@@ -1,10 +1,22 @@
 import type { FC } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Employees from './pages/Employees';
 import EmployeeDetails from './pages/EmployeeDetails';
 import Insights from './pages/Insights';
+
+// Create a query client with reasonable default config
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false, // Disable automatic refetching on window focus
+      retry: 1, // Limit retry attempts on network error
+      staleTime: 1000 * 60 * 5, // Data is fresh for 5 minutes
+    },
+  },
+});
 
 const router = createBrowserRouter([
   {
@@ -32,7 +44,11 @@ const router = createBrowserRouter([
 ]);
 
 const App: FC = () => {
-  return <RouterProvider router={router} />;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
+  );
 };
 
 export default App;
