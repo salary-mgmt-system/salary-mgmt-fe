@@ -1,4 +1,6 @@
-const Insights = () => {
+import type { FC } from 'react';
+
+const Insights: FC = () => {
   return (
     <div>
       <h1>Compensation Insights</h1>

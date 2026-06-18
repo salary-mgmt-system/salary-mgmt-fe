@@ -1,6 +1,7 @@
+import type { FC } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 
-const Layout = () => {
+const Layout: FC = () => {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'sans-serif' }}>
       {/* Sidebar Navigation */}

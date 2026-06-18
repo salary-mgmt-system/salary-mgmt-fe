@@ -1,4 +1,6 @@
-const Employees = () => {
+import type { FC } from 'react';
+
+const Employees: FC = () => {
   return (
     <div>
       <h1>Employee Directory</h1>

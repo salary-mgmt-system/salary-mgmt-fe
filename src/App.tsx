@@ -1,3 +1,4 @@
+import type { FC } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
@@ -30,7 +31,7 @@ const router = createBrowserRouter([
   },
 ]);
 
-const App = () => {
+const App: FC = () => {
   return <RouterProvider router={router} />;
 };
 
