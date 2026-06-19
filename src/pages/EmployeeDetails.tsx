@@ -9,8 +9,10 @@ import Skeleton from '@mui/material/Skeleton';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import BusinessCenterRoundedIcon from '@mui/icons-material/BusinessCenterRounded';
 import PaymentsRoundedIcon from '@mui/icons-material/PaymentsRounded';
+import HistoryRoundedIcon from '@mui/icons-material/HistoryRounded';
+import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 
-import { fetchEmployeeDetails } from '../api/api';
+import { fetchEmployeeDetails, fetchSalaryHistory } from '../api/api';
 import {
   BackButtonContainer,
   StyledBackButton,
@@ -38,6 +40,16 @@ import {
   StyledSmallDivider,
   LoadingCard,
   LoadingSideCard,
+  TimelineHeader,
+  TimelineTitle,
+  TimelineContainer,
+  TimelineItem,
+  TimelineDot,
+  TimelineContentCard,
+  TimelineChangeInfo,
+  TimelineDifference,
+  TimelineReason,
+  TimelineDate,
 } from './EmployeeDetails.styles';
 
 const formatCurrency = (amount: number, currency: string) => {
@@ -55,6 +67,12 @@ const EmployeeDetails: FC = () => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['employee', employeeId],
     queryFn: () => fetchEmployeeDetails(employeeId),
+    enabled: !!employeeId,
+  });
+
+  const { data: salaryHistory, isLoading: isLoadingHistory } = useQuery({
+    queryKey: ['employeeSalaryHistory', employeeId],
+    queryFn: () => fetchSalaryHistory(employeeId),
     enabled: !!employeeId,
   });
 
@@ -239,6 +257,85 @@ const EmployeeDetails: FC = () => {
                   <Typography color="text.secondary">No active salary record exists for this employee.</Typography>
                 )}
               </CompensationCardContent>
+            </DetailsCard>
+          </Grid>
+
+          {/* Salary History Card */}
+          <Grid size={{ xs: 12 }}>
+            <DetailsCard>
+              <DetailsCardContent>
+                <TimelineHeader>
+                  <HistoryRoundedIcon color="secondary" />
+                  <TimelineTitle variant="h6">Compensation History</TimelineTitle>
+                </TimelineHeader>
+                <StyledDivider />
+
+                {isLoadingHistory ? (
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }} data-testid="timeline-loading">
+                    <Skeleton variant="rectangular" height={80} sx={{ borderRadius: 2 }} />
+                    <Skeleton variant="rectangular" height={80} sx={{ borderRadius: 2 }} />
+                  </Box>
+                ) : salaryHistory && salaryHistory.length > 0 ? (
+                  <TimelineContainer data-testid="timeline-container">
+                    {salaryHistory.map((item, index) => {
+                      const diff = item.newSalary - item.oldSalary;
+                      const isPositive = diff >= 0;
+                      const percentChange = item.oldSalary > 0 
+                        ? ((diff / item.oldSalary) * 100).toFixed(1)
+                        : null;
+
+                      let formattedDate = item.changedAt;
+                      const dateObj = new Date(item.changedAt);
+                      if (!isNaN(dateObj.getTime())) {
+                        try {
+                          formattedDate = dateObj.toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            timeZone: 'UTC',
+                          });
+                        } catch {
+                          // ignore error
+                        }
+                      }
+
+                      return (
+                        <TimelineItem key={item.id} data-testid="timeline-item">
+                          <TimelineDot $isLatest={index === 0} />
+                          <TimelineContentCard>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 1 }}>
+                              <TimelineChangeInfo>
+                                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                                  {formatCurrency(item.oldSalary, employee.currency)}
+                                </Typography>
+                                <ArrowForwardRoundedIcon sx={{ fontSize: '0.9rem', color: 'text.secondary' }} />
+                                <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                                  {formatCurrency(item.newSalary, employee.currency)}
+                                </Typography>
+                                <TimelineDifference $isPositive={isPositive}>
+                                  {isPositive ? '+' : ''}
+                                  {formatCurrency(diff, employee.currency)}
+                                  {percentChange ? ` (${isPositive ? '+' : ''}${percentChange}%)` : ''}
+                                </TimelineDifference>
+                              </TimelineChangeInfo>
+                              <TimelineDate color="text.secondary">
+                                {formattedDate}
+                              </TimelineDate>
+                            </Box>
+                            <TimelineReason variant="body2" color="text.secondary">
+                              <strong>Reason:</strong> {item.reason}
+                            </TimelineReason>
+                          </TimelineContentCard>
+                        </TimelineItem>
+                      );
+                    })}
+                  </TimelineContainer>
+                ) : (
+                  <Typography color="text.secondary" sx={{ py: 2 }} data-testid="no-timeline-data">
+                    No previous salary changes recorded for this employee.
+                  </Typography>
+                )}
+              </DetailsCardContent>
             </DetailsCard>
           </Grid>
         </Grid>

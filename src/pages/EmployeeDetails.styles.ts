@@ -189,3 +189,109 @@ export const LoadingSideCard = styled(Card)`
     padding: 24px;
   }
 `;
+
+export const TimelineHeader = styled(Box)`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  margin-bottom: 16px;
+`;
+
+export const TimelineTitle = styled(Typography)`
+  && {
+    font-weight: 700;
+  }
+`;
+
+export const TimelineContainer = styled(Box)`
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-left: 24px;
+  margin-top: 16px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: 4px;
+    width: 2px;
+    background-color: ${theme.palette.divider};
+  }
+`;
+
+export const TimelineItem = styled(Box)`
+  display: flex;
+  position: relative;
+  margin-bottom: 24px;
+  gap: 16px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+export const TimelineDot = styled(Box)<{ $isLatest?: boolean }>`
+  position: absolute;
+  left: -24px;
+  top: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: ${props => props.$isLatest ? theme.palette.primary.main : theme.palette.text.disabled};
+  border: 2px solid ${theme.palette.background.paper};
+  box-shadow: 0 0 0 2px ${props => props.$isLatest ? theme.palette.primary.light : 'transparent'};
+  z-index: 1;
+`;
+
+export const TimelineContentCard = styled(Box)`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding: 16px;
+  background-color: ${theme.palette.background.paper};
+  border: 1px solid ${theme.palette.divider};
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    border-color: ${theme.palette.primary.light};
+    background-color: ${theme.palette.action.hover};
+    transform: translateY(-2px);
+  }
+`;
+
+export const TimelineChangeInfo = styled(Box)`
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+`;
+
+export const TimelineDifference = styled(Box)<{ $isPositive?: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background-color: ${props => props.$isPositive ? 'rgba(76, 175, 80, 0.1)' : 'rgba(244, 67, 54, 0.1)'};
+  color: ${props => props.$isPositive ? theme.palette.success.main : theme.palette.error.main};
+`;
+
+export const TimelineReason = styled(Typography)`
+  && {
+    font-weight: 500;
+    font-size: 0.875rem;
+  }
+`;
+
+export const TimelineDate = styled(Typography)`
+  && {
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+`;

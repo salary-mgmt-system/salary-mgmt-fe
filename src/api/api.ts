@@ -77,3 +77,11 @@ export async function fetchEmployeeDetails(id: string): Promise<GetEmployeeDetai
   }
   return res.json() as Promise<GetEmployeeDetailsResponse>;
 }
+
+export async function fetchSalaryHistory(id: string): Promise<SalaryHistory[]> {
+  const res = await fetch(`${API_BASE_URL}/employees/${id}/salary-history`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch salary history: ${res.statusText}`);
+  }
+  return res.json() as Promise<SalaryHistory[]>;
+}
