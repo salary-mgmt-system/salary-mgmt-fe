@@ -124,6 +124,17 @@ export const CompensationTitle = styled(Typography)`
   }
 `;
 
+export const UpdateSalaryButton = styled(Button)`
+  && {
+    margin-left: auto;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    padding: 6px 16px;
+    text-transform: none;
+  }
+`;
+
 export const CompensationRow = styled(Box)`
   display: flex;
   justify-content: space-between;

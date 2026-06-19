@@ -1,17 +1,19 @@
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from '../theme/theme';
 import EmployeeDetails from './EmployeeDetails';
-import { fetchEmployeeDetails, fetchSalaryHistory } from '../api/api';
+import { fetchEmployeeDetails, fetchSalaryHistory, updateSalary } from '../api/api';
 import type { GetEmployeeDetailsResponse } from '../api/api';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('../api/api', () => ({
   fetchEmployeeDetails: vi.fn(),
   fetchSalaryHistory: vi.fn(),
+  updateSalary: vi.fn(),
 }));
 
 const mockEmployeeDetails = {
@@ -298,6 +300,107 @@ describe('EmployeeDetails Component', () => {
 
       await waitFor(() => {
         expect(screen.getByText('invalid-date-string')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Salary Update Dialog', () => {
+    it('renders the Update button when employee and salary exist', async () => {
+      vi.mocked(fetchEmployeeDetails).mockResolvedValueOnce(mockEmployeeDetails);
+      renderEmployeeDetails();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('update-salary-btn')).toBeInTheDocument();
+      });
+    });
+
+    it('does not render Update button when no salary exists', async () => {
+      vi.mocked(fetchEmployeeDetails).mockResolvedValueOnce({
+        employee: mockEmployeeDetails.employee,
+        currentSalary: null,
+      });
+      renderEmployeeDetails();
+
+      await waitFor(() => {
+        expect(screen.getByText('No active salary record exists for this employee.')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('update-salary-btn')).not.toBeInTheDocument();
+    });
+
+    it('opens dialog when Update button is clicked', async () => {
+      const user = userEvent.setup();
+      vi.mocked(fetchEmployeeDetails).mockResolvedValueOnce(mockEmployeeDetails);
+      renderEmployeeDetails();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('update-salary-btn')).toBeInTheDocument();
+      });
+
+      await user.click(screen.getByTestId('update-salary-btn'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('salary-update-dialog')).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: 'Update Salary' })).toBeInTheDocument();
+      });
+    });
+
+    it('closes dialog on cancel and shows no snackbar', async () => {
+      const user = userEvent.setup();
+      vi.mocked(fetchEmployeeDetails).mockResolvedValueOnce(mockEmployeeDetails);
+      renderEmployeeDetails();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('update-salary-btn')).toBeInTheDocument();
+      });
+
+      await user.click(screen.getByTestId('update-salary-btn'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('salary-update-dialog')).toBeInTheDocument();
+      });
+
+      await user.click(screen.getByTestId('salary-update-cancel'));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('salary-update-dialog')).not.toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('salary-update-success')).not.toBeInTheDocument();
+    });
+
+    it('shows success snackbar after successful salary update', async () => {
+      const user = userEvent.setup();
+      vi.mocked(fetchEmployeeDetails).mockResolvedValue(mockEmployeeDetails);
+      vi.mocked(updateSalary).mockResolvedValueOnce({
+        employee: mockEmployeeDetails.employee,
+        currentSalary: { ...mockEmployeeDetails.currentSalary!, baseSalary: 130000 },
+      });
+      renderEmployeeDetails();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('update-salary-btn')).toBeInTheDocument();
+      });
+
+      await user.click(screen.getByTestId('update-salary-btn'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('salary-update-dialog')).toBeInTheDocument();
+      });
+
+      const baseSalaryInput = screen.getByTestId('base-salary-input');
+      await user.clear(baseSalaryInput);
+      await user.type(baseSalaryInput, '130000');
+
+      const effectiveDateInput = screen.getByTestId('effective-date-input');
+      await user.type(effectiveDateInput, '2026-07-01');
+
+      const reasonInput = screen.getByTestId('reason-input');
+      await user.type(reasonInput, 'Performance review');
+
+      await user.click(screen.getByTestId('salary-update-submit'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('salary-update-success')).toBeInTheDocument();
+        expect(screen.getByText('Salary updated successfully!')).toBeInTheDocument();
       });
     });
   });

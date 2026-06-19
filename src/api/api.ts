@@ -53,6 +53,18 @@ export interface GetEmployeeDetailsResponse {
   currentSalary: Salary | null;
 }
 
+export interface UpdateSalaryPayload {
+  baseSalary: number;
+  bonus: number;
+  effectiveDate: string;
+  reason: string;
+}
+
+export interface UpdateSalaryResponse {
+  employee: Employee;
+  currentSalary: Salary;
+}
+
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:3000/api';
 
 export async function fetchEmployees(params: GetEmployeesParams): Promise<GetEmployeesResponse> {
@@ -84,4 +96,16 @@ export async function fetchSalaryHistory(id: string): Promise<SalaryHistory[]> {
     throw new Error(`Failed to fetch salary history: ${res.statusText}`);
   }
   return res.json() as Promise<SalaryHistory[]>;
+}
+
+export async function updateSalary(id: string, payload: UpdateSalaryPayload): Promise<UpdateSalaryResponse> {
+  const res = await fetch(`${API_BASE_URL}/employees/${id}/salary`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to update salary: ${res.statusText}`);
+  }
+  return res.json() as Promise<UpdateSalaryResponse>;
 }

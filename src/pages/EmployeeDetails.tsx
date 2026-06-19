@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import { useState, type FC } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Box from '@mui/material/Box';
@@ -6,13 +6,16 @@ import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
 import Skeleton from '@mui/material/Skeleton';
+import Snackbar from '@mui/material/Snackbar';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import BusinessCenterRoundedIcon from '@mui/icons-material/BusinessCenterRounded';
 import PaymentsRoundedIcon from '@mui/icons-material/PaymentsRounded';
 import HistoryRoundedIcon from '@mui/icons-material/HistoryRounded';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
 
 import { fetchEmployeeDetails, fetchSalaryHistory } from '../api/api';
+import SalaryUpdateDialog from '../components/SalaryUpdateDialog';
 import {
   BackButtonContainer,
   StyledBackButton,
@@ -30,6 +33,7 @@ import {
   SectionTitle,
   CompensationHeader,
   CompensationTitle,
+  UpdateSalaryButton,
   CompensationRow,
   BaseSalaryValue,
   BonusValue,
@@ -63,6 +67,9 @@ const formatCurrency = (amount: number, currency: string) => {
 const EmployeeDetails: FC = () => {
   const { id } = useParams<{ id: string }>();
   const employeeId = id || '';
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['employee', employeeId],
@@ -210,6 +217,17 @@ const EmployeeDetails: FC = () => {
                   <CompensationTitle variant="h5">
                     Current Compensation
                   </CompensationTitle>
+                  {currentSalary && (
+                    <UpdateSalaryButton
+                      variant="outlined"
+                      size="small"
+                      startIcon={<EditRoundedIcon />}
+                      onClick={() => setDialogOpen(true)}
+                      data-testid="update-salary-btn"
+                    >
+                      Update
+                    </UpdateSalaryButton>
+                  )}
                 </CompensationHeader>
                 <StyledDivider />
 
@@ -342,6 +360,38 @@ const EmployeeDetails: FC = () => {
       ) : (
         <Alert severity="warning">Employee not found.</Alert>
       )}
+
+      {/* Salary Update Dialog */}
+      {employee && currentSalary && (
+        <SalaryUpdateDialog
+          open={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+          onSuccess={() => setSnackbarOpen(true)}
+          employeeId={employeeId}
+          employeeName={`${employee.firstName} ${employee.lastName}`}
+          currency={employee.currency}
+          currentBaseSalary={currentSalary.baseSalary}
+          currentBonus={currentSalary.bonus}
+        />
+      )}
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity="success"
+          variant="filled"
+          sx={{ width: '100%' }}
+          data-testid="salary-update-success"
+        >
+          Salary updated successfully!
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
