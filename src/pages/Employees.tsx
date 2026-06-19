@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import TableBody from '@mui/material/TableBody';
@@ -58,16 +58,20 @@ const Employees: FC = () => {
 
   // Debounce search input by 500ms
   useEffect(() => {
+    if (searchInput === '' && search === '') {
+      return;
+    }
     const handler = setTimeout(() => {
       setSearch(searchInput);
       setPage(1);
     }, 500);
     return () => clearTimeout(handler);
-  }, [searchInput]);
+  }, [searchInput, search]);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['employees', { page, pageSize, search, department, country, sortBy, sortOrder }],
     queryFn: () => fetchEmployees({ page, pageSize, search, department, country, sortBy, sortOrder }),
+    placeholderData: keepPreviousData,
   });
 
   const handleSort = (field: string) => {
@@ -127,6 +131,7 @@ const Employees: FC = () => {
 
           <DropdownField
             select
+            name="department"
             size="small"
             label="Department"
             value={department}
@@ -145,6 +150,7 @@ const Employees: FC = () => {
 
           <DropdownField
             select
+            name="country"
             size="small"
             label="Country"
             value={country}
@@ -247,6 +253,11 @@ const Employees: FC = () => {
                 setPage(1);
               }}
               rowsPerPageOptions={[5, 10, 25, 50]}
+              slotProps={{
+                select: {
+                  native: true,
+                },
+              }}
             />
           )}
         </StyledTableContainer>

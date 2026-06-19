@@ -50,11 +50,12 @@ const formatCurrency = (amount: number, currency: string) => {
 
 const EmployeeDetails: FC = () => {
   const { id } = useParams<{ id: string }>();
+  const employeeId = id || '';
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['employee', id],
-    queryFn: () => fetchEmployeeDetails(id || ''),
-    enabled: !!id,
+    queryKey: ['employee', employeeId],
+    queryFn: () => fetchEmployeeDetails(employeeId),
+    enabled: !!employeeId,
   });
 
   if (isError) {
