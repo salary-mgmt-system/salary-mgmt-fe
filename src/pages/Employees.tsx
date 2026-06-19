@@ -4,16 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import Card from '@mui/material/Card';
-import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import TableSortLabel from '@mui/material/TableSortLabel';
 import Paper from '@mui/material/Paper';
-import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import TablePagination from '@mui/material/TablePagination';
 import Alert from '@mui/material/Alert';
@@ -22,6 +17,20 @@ import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
 
 import { fetchEmployees } from '../api/api';
+import {
+  PageHeader,
+  PageTitle,
+  FilterCard,
+  FilterToolbar,
+  SearchField,
+  DropdownField,
+  StyledTableContainer,
+  StyledTable,
+  StyledSortLabel,
+  ClickableRow,
+  CodeCell,
+  EmptyStateCell,
+} from './Employees.styles';
 
 const COUNTRIES = ['United States', 'United Kingdom', 'Germany', 'India', 'Canada'];
 const DEPARTMENTS = ['Engineering', 'Product', 'Marketing', 'Sales', 'HR', 'Finance'];
@@ -88,24 +97,23 @@ const Employees: FC = () => {
 
   return (
     <Box>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h3" sx={{ mb: 1, color: 'text.primary', fontWeight: 800 }}>
+      <PageHeader>
+        <PageTitle variant="h3">
           Employee Directory
-        </Typography>
+        </PageTitle>
         <Typography variant="body1" color="text.secondary">
           Manage, search, and audit employee records and compensation structures.
         </Typography>
-      </Box>
+      </PageHeader>
 
       {/* Filters Toolbar */}
-      <Card sx={{ mb: 3, p: 2 }}>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-          <TextField
+      <FilterCard>
+        <FilterToolbar>
+          <SearchField
             size="small"
             placeholder="Search name, code, email..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            sx={{ flexGrow: 1, minWidth: 250 }}
             slotProps={{
               input: {
                 startAdornment: (
@@ -117,7 +125,7 @@ const Employees: FC = () => {
             }}
           />
 
-          <TextField
+          <DropdownField
             select
             size="small"
             label="Department"
@@ -126,7 +134,6 @@ const Employees: FC = () => {
               setDepartment(e.target.value);
               setPage(1);
             }}
-            sx={{ minWidth: 160 }}
           >
             <MenuItem value="">All Departments</MenuItem>
             {DEPARTMENTS.map((dept) => (
@@ -134,9 +141,9 @@ const Employees: FC = () => {
                 {dept}
               </MenuItem>
             ))}
-          </TextField>
+          </DropdownField>
 
-          <TextField
+          <DropdownField
             select
             size="small"
             label="Country"
@@ -145,7 +152,6 @@ const Employees: FC = () => {
               setCountry(e.target.value);
               setPage(1);
             }}
-            sx={{ minWidth: 160 }}
           >
             <MenuItem value="">All Countries</MenuItem>
             {COUNTRIES.map((c) => (
@@ -153,9 +159,9 @@ const Employees: FC = () => {
                 {c}
               </MenuItem>
             ))}
-          </TextField>
-        </Box>
-      </Card>
+          </DropdownField>
+        </FilterToolbar>
+      </FilterCard>
 
       {/* Employees Table */}
       {isError ? (
@@ -163,20 +169,19 @@ const Employees: FC = () => {
           Error loading employees: {error instanceof Error ? error.message : 'Unknown error'}
         </Alert>
       ) : (
-        <TableContainer component={Paper} sx={{ boxShadow: 'none', border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
-          <Table sx={{ minWidth: 800 }}>
+        <StyledTableContainer component={Paper}>
+          <StyledTable>
             <TableHead>
               <TableRow>
                 {columns.map((col) => (
                   <TableCell key={col.id}>
-                    <TableSortLabel
+                    <StyledSortLabel
                       active={sortBy === col.id}
                       direction={sortBy === col.id ? (sortOrder.toLowerCase() as 'asc' | 'desc') : 'asc'}
                       onClick={() => handleSort(col.id)}
-                      sx={{ fontWeight: 600 }}
                     >
                       {col.label}
-                    </TableSortLabel>
+                    </StyledSortLabel>
                   </TableCell>
                 ))}
               </TableRow>
@@ -196,13 +201,12 @@ const Employees: FC = () => {
                 data.data.map((employee) => {
                   const currentSalary = employee.salaries?.[0];
                   return (
-                    <TableRow
+                    <ClickableRow
                       key={employee.id}
                       hover
                       onClick={() => handleRowClick(employee.id)}
-                      sx={{ cursor: 'pointer', '&:last-child td, &:last-child th': { border: 0 } }}
                     >
-                      <TableCell sx={{ fontWeight: 500 }}>{employee.employeeCode}</TableCell>
+                      <CodeCell>{employee.employeeCode}</CodeCell>
                       <TableCell>{`${employee.firstName} ${employee.lastName}`}</TableCell>
                       <TableCell>{employee.email}</TableCell>
                       <TableCell>{employee.department}</TableCell>
@@ -218,18 +222,18 @@ const Employees: FC = () => {
                           ? formatCurrency(currentSalary.bonus, employee.currency)
                           : 'N/A'}
                       </TableCell>
-                    </TableRow>
+                    </ClickableRow>
                   );
                 })
               ) : (
                 <TableRow>
-                  <TableCell colSpan={columns.length} align="center" sx={{ py: 6 }}>
+                  <EmptyStateCell colSpan={columns.length} align="center">
                     <Typography color="text.secondary">No employees found.</Typography>
-                  </TableCell>
+                  </EmptyStateCell>
                 </TableRow>
               )}
             </TableBody>
-          </Table>
+          </StyledTable>
 
           {data && (
             <TablePagination
@@ -245,7 +249,7 @@ const Employees: FC = () => {
               rowsPerPageOptions={[5, 10, 25, 50]}
             />
           )}
-        </TableContainer>
+        </StyledTableContainer>
       )}
     </Box>
   );

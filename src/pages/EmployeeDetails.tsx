@@ -3,19 +3,42 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
-import Divider from '@mui/material/Divider';
 import Alert from '@mui/material/Alert';
 import Skeleton from '@mui/material/Skeleton';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
-import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
 import BusinessCenterRoundedIcon from '@mui/icons-material/BusinessCenterRounded';
 import PaymentsRoundedIcon from '@mui/icons-material/PaymentsRounded';
 
 import { fetchEmployeeDetails } from '../api/api';
+import {
+  BackButtonContainer,
+  StyledBackButton,
+  DetailsCard,
+  DetailsCardContent,
+  CompensationCardContent,
+  ProfileHeader,
+  AvatarBox,
+  StyledAvatarIcon,
+  ProfileName,
+  ProfileCode,
+  FieldLabel,
+  FieldValue,
+  SectionHeader,
+  SectionTitle,
+  CompensationHeader,
+  CompensationTitle,
+  CompensationRow,
+  BaseSalaryValue,
+  BonusValue,
+  TotalCompensationBox,
+  TotalCompensationValue,
+  EffectiveDateBox,
+  StyledDivider,
+  StyledSmallDivider,
+  LoadingCard,
+  LoadingSideCard,
+} from './EmployeeDetails.styles';
 
 const formatCurrency = (amount: number, currency: string) => {
   try {
@@ -37,17 +60,16 @@ const EmployeeDetails: FC = () => {
   if (isError) {
     return (
       <Box>
-        <Box sx={{ mb: 4 }}>
-          <Button
+        <BackButtonContainer>
+          <StyledBackButton
             component={Link}
             to="/employees"
             variant="outlined"
             startIcon={<ArrowBackRoundedIcon />}
-            sx={{ borderColor: 'divider', color: 'text.secondary' }}
           >
             Back to Directory
-          </Button>
-        </Box>
+          </StyledBackButton>
+        </BackButtonContainer>
         <Alert severity="error">
           Error loading employee details: {error instanceof Error ? error.message : 'Unknown error'}
         </Alert>
@@ -60,184 +82,163 @@ const EmployeeDetails: FC = () => {
 
   return (
     <Box>
-      <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Button
+      <BackButtonContainer>
+        <StyledBackButton
           component={Link}
           to="/employees"
           variant="outlined"
           startIcon={<ArrowBackRoundedIcon />}
-          sx={{ borderColor: 'divider', color: 'text.secondary', borderRadius: 2 }}
         >
           Back to Directory
-        </Button>
-      </Box>
+        </StyledBackButton>
+      </BackButtonContainer>
 
       {isLoading ? (
         <Grid container spacing={3}>
           <Grid size={{ xs: 12, md: 8 }}>
-            <Card sx={{ p: 3, mb: 3 }}>
+            <LoadingCard>
               <Skeleton variant="text" height={40} width="60%" />
               <Skeleton variant="text" height={20} width="40%" />
-              <Divider sx={{ my: 2 }} />
+              <StyledDivider />
               <Skeleton variant="rectangular" height={150} />
-            </Card>
+            </LoadingCard>
           </Grid>
           <Grid size={{ xs: 12, md: 4 }}>
-            <Card sx={{ p: 3 }}>
+            <LoadingSideCard>
               <Skeleton variant="rectangular" height={200} />
-            </Card>
+            </LoadingSideCard>
           </Grid>
         </Grid>
       ) : employee ? (
         <Grid container spacing={3}>
           {/* Main Info Card */}
           <Grid size={{ xs: 12, md: 7 }}>
-            <Card sx={{ height: '100%', borderRadius: 3, border: '1px solid', borderColor: 'divider', boxShadow: 'none' }}>
-              <CardContent sx={{ p: 4 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-                  <Box
-                    sx={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 3,
-                      bgcolor: 'primary.light',
-                      color: 'primary.main',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <AccountCircleRoundedIcon sx={{ fontSize: '2rem' }} />
-                  </Box>
+            <DetailsCard>
+              <DetailsCardContent>
+                <ProfileHeader>
+                  <AvatarBox>
+                    <StyledAvatarIcon />
+                  </AvatarBox>
                   <Box>
-                    <Typography variant="h4" sx={{ fontWeight: 800 }}>
+                    <ProfileName variant="h4">
                       {`${employee.firstName} ${employee.lastName}`}
-                    </Typography>
-                    <Typography variant="subtitle1" color="text.secondary" sx={{ fontWeight: 500 }}>
+                    </ProfileName>
+                    <ProfileCode variant="subtitle1" color="text.secondary">
                       {employee.employeeCode}
-                    </Typography>
+                    </ProfileCode>
                   </Box>
-                </Box>
+                </ProfileHeader>
 
-                <Divider sx={{ my: 3 }} />
+                <StyledDivider />
 
                 <Grid container spacing={3}>
                   <Grid size={{ xs: 12, sm: 6 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
+                    <FieldLabel variant="caption" color="text.secondary">
                       Email Address
-                    </Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                    </FieldLabel>
+                    <FieldValue variant="body1">
                       {employee.email}
-                    </Typography>
+                    </FieldValue>
                   </Grid>
 
                   <Grid size={{ xs: 12, sm: 6 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
+                    <FieldLabel variant="caption" color="text.secondary">
                       Country (Currency)
-                    </Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                    </FieldLabel>
+                    <FieldValue variant="body1">
                       {`${employee.country} (${employee.currency})`}
-                    </Typography>
+                    </FieldValue>
                   </Grid>
                 </Grid>
 
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 4, mb: 2 }}>
+                <SectionHeader>
                   <BusinessCenterRoundedIcon color="action" />
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  <SectionTitle variant="h6">
                     Organization Details
-                  </Typography>
-                </Box>
-                <Divider sx={{ my: 3 }} />
+                  </SectionTitle>
+                </SectionHeader>
+                <StyledDivider />
 
                 <Grid container spacing={3}>
                   <Grid size={{ xs: 12, sm: 6 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
+                    <FieldLabel variant="caption" color="text.secondary">
                       Department
-                    </Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                    </FieldLabel>
+                    <FieldValue variant="body1">
                       {employee.department}
-                    </Typography>
+                    </FieldValue>
                   </Grid>
 
                   <Grid size={{ xs: 12, sm: 6 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
+                    <FieldLabel variant="caption" color="text.secondary">
                       Designation
-                    </Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                    </FieldLabel>
+                    <FieldValue variant="body1">
                       {employee.designation}
-                    </Typography>
+                    </FieldValue>
                   </Grid>
                 </Grid>
-              </CardContent>
-            </Card>
+              </DetailsCardContent>
+            </DetailsCard>
           </Grid>
 
           {/* Compensation Summary Card */}
           <Grid size={{ xs: 12, md: 5 }}>
-            <Card sx={{ height: '100%', borderRadius: 3, border: '1px solid', borderColor: 'divider', boxShadow: 'none' }}>
-              <CardContent sx={{ p: 4, display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+            <DetailsCard>
+              <CompensationCardContent>
+                <CompensationHeader>
                   <PaymentsRoundedIcon color="primary" />
-                  <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                  <CompensationTitle variant="h5">
                     Current Compensation
-                  </Typography>
-                </Box>
-                <Divider sx={{ mb: 3 }} />
+                  </CompensationTitle>
+                </CompensationHeader>
+                <StyledDivider />
 
                 {currentSalary ? (
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, flexGrow: 1 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <CompensationRow>
                       <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
                         Base Salary
                       </Typography>
-                      <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                      <BaseSalaryValue variant="h5">
                         {formatCurrency(currentSalary.baseSalary, employee.currency)}
-                      </Typography>
-                    </Box>
+                      </BaseSalaryValue>
+                    </CompensationRow>
 
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <CompensationRow>
                       <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
                         Bonus
                       </Typography>
-                      <Typography variant="h6" sx={{ fontWeight: 600, color: 'success.main' }}>
+                      <BonusValue variant="h6">
                         + {formatCurrency(currentSalary.bonus, employee.currency)}
-                      </Typography>
-                    </Box>
+                      </BonusValue>
+                    </CompensationRow>
 
-                    <Divider sx={{ my: 1 }} />
+                    <StyledSmallDivider />
 
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'baseline',
-                        p: 2,
-                        bgcolor: 'action.hover',
-                        borderRadius: 2,
-                      }}
-                    >
+                    <TotalCompensationBox>
                       <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
                         Total Compensation
                       </Typography>
-                      <Typography variant="h4" color="primary" sx={{ fontWeight: 800 }}>
+                      <TotalCompensationValue variant="h4" color="primary">
                         {formatCurrency(currentSalary.baseSalary + currentSalary.bonus, employee.currency)}
-                      </Typography>
-                    </Box>
+                      </TotalCompensationValue>
+                    </TotalCompensationBox>
 
-                    <Box sx={{ mt: 'auto', pt: 2 }}>
-                      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
+                    <EffectiveDateBox>
+                      <FieldLabel variant="caption" color="text.secondary">
                         Effective Date of Salary
-                      </Typography>
+                      </FieldLabel>
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
                         {currentSalary.effectiveDate}
                       </Typography>
-                    </Box>
+                    </EffectiveDateBox>
                   </Box>
                 ) : (
                   <Typography color="text.secondary">No active salary record exists for this employee.</Typography>
                 )}
-              </CardContent>
-            </Card>
+              </CompensationCardContent>
+            </DetailsCard>
           </Grid>
         </Grid>
       ) : (

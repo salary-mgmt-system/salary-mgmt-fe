@@ -1,3 +1,4 @@
+import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import type { FC } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -50,8 +51,10 @@ const App: FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <RouterProvider router={router} />
+        <StyledThemeProvider theme={theme}>
+          <CssBaseline />
+          <RouterProvider router={router} />
+        </StyledThemeProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
