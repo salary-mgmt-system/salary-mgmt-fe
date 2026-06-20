@@ -97,6 +97,32 @@ describe('Insights Component', () => {
     });
   });
 
+  it('calls queryInsights again when retry button is clicked', async () => {
+    vi.mocked(queryInsights).mockRejectedValueOnce(new Error('Network failure'));
+    renderInsights();
+
+    // Trigger query
+    const suggestion = screen.getByText('Who are the top 10 highest-paid employees?');
+    fireEvent.click(suggestion);
+
+    // Wait for the retry button
+    let retryBtn: HTMLElement;
+    await waitFor(() => {
+      retryBtn = screen.getByTestId('error-retry-button');
+      expect(retryBtn).toBeInTheDocument();
+    });
+
+    vi.mocked(queryInsights).mockClear();
+    vi.mocked(queryInsights).mockResolvedValueOnce({ answer: 'Mocked retry answer' });
+    
+    // Click retry
+    fireEvent.click(retryBtn!);
+
+    await waitFor(() => {
+      expect(screen.getByText('Mocked retry answer')).toBeInTheDocument();
+    });
+  });
+
   it('does not submit query if input is empty', () => {
     renderInsights();
     const input = screen.getByPlaceholderText('Ask a compensation question...');

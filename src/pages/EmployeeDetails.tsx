@@ -1,10 +1,9 @@
 import { useState, type FC } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
-import Alert from '@mui/material/Alert';
 import Skeleton from '@mui/material/Skeleton';
 import Snackbar from '@mui/material/Snackbar';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
@@ -13,7 +12,10 @@ import PaymentsRoundedIcon from '@mui/icons-material/PaymentsRounded';
 import HistoryRoundedIcon from '@mui/icons-material/HistoryRounded';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
+import Alert from '@mui/material/Alert';
 
+import ErrorPanel from '../components/ErrorPanel';
+import EmptyState from '../components/EmptyState';
 import { fetchEmployeeDetails, fetchSalaryHistory } from '../api/api';
 import SalaryUpdateDialog from '../components/SalaryUpdateDialog';
 import {
@@ -65,23 +67,29 @@ const formatCurrency = (amount: number, currency: string) => {
 };
 
 const EmployeeDetails: FC = () => {
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const employeeId = id || '';
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['employee', employeeId],
     queryFn: () => fetchEmployeeDetails(employeeId),
     enabled: !!employeeId,
   });
 
-  const { data: salaryHistory, isLoading: isLoadingHistory } = useQuery({
+  const { data: salaryHistory, isLoading: isLoadingHistory, refetch: refetchHistory } = useQuery({
     queryKey: ['employeeSalaryHistory', employeeId],
     queryFn: () => fetchSalaryHistory(employeeId),
     enabled: !!employeeId,
   });
+
+  const handleRetry = () => {
+    refetch();
+    refetchHistory();
+  };
 
   if (isError) {
     return (
@@ -96,9 +104,13 @@ const EmployeeDetails: FC = () => {
             Back to Directory
           </StyledBackButton>
         </BackButtonContainer>
-        <Alert severity="error">
-          Error loading employee details: {error instanceof Error ? error.message : 'Unknown error'}
-        </Alert>
+        <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
+          <ErrorPanel
+            title="Details Loading Error"
+            message={`Error loading employee details: ${error instanceof Error ? error.message : 'Unknown error'}`}
+            onRetry={handleRetry}
+          />
+        </Box>
       </Box>
     );
   }
@@ -107,7 +119,7 @@ const EmployeeDetails: FC = () => {
   const currentSalary = data?.currentSalary;
 
   return (
-    <Box>
+    <Box className="animate-page">
       <BackButtonContainer>
         <StyledBackButton
           component={Link}
@@ -349,16 +361,27 @@ const EmployeeDetails: FC = () => {
                     })}
                   </TimelineContainer>
                 ) : (
-                  <Typography color="text.secondary" sx={{ py: 2 }} data-testid="no-timeline-data">
-                    No previous salary changes recorded for this employee.
-                  </Typography>
+                  <Box data-testid="no-timeline-data" sx={{ py: 2 }}>
+                    <EmptyState
+                      icon={<HistoryRoundedIcon />}
+                      title="No Salary History"
+                      message="No previous salary changes recorded for this employee."
+                    />
+                  </Box>
                 )}
               </DetailsCardContent>
             </DetailsCard>
           </Grid>
         </Grid>
       ) : (
-        <Alert severity="warning">Employee not found.</Alert>
+        <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
+          <EmptyState
+            title="Employee Not Found"
+            message="Employee not found."
+            actionText="Back to Directory"
+            onAction={() => navigate('/employees')}
+          />
+        </Box>
       )}
 
       {/* Salary Update Dialog */}

@@ -4,8 +4,8 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Skeleton from '@mui/material/Skeleton';
-import Alert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
+import ErrorPanel from '../components/ErrorPanel';
 import {
   BarChart,
   Bar,
@@ -52,6 +52,7 @@ const Dashboard: FC = () => {
     data: overviewData,
     isLoading: isLoadingOverview,
     error: overviewError,
+    refetch: refetchOverview,
   } = useQuery({
     queryKey: ['overviewAnalytics'],
     queryFn: fetchOverviewAnalytics,
@@ -61,6 +62,7 @@ const Dashboard: FC = () => {
     data: countryData,
     isLoading: isLoadingCountry,
     error: countryError,
+    refetch: refetchCountry,
   } = useQuery({
     queryKey: ['countryAnalytics'],
     queryFn: fetchCountryAnalytics,
@@ -70,6 +72,7 @@ const Dashboard: FC = () => {
     data: deptData,
     isLoading: isLoadingDept,
     error: deptError,
+    refetch: refetchDept,
   } = useQuery({
     queryKey: ['departmentAnalytics'],
     queryFn: fetchDepartmentAnalytics,
@@ -79,6 +82,7 @@ const Dashboard: FC = () => {
     data: distData,
     isLoading: isLoadingDist,
     error: distError,
+    refetch: refetchDist,
   } = useQuery({
     queryKey: ['salaryDistribution'],
     queryFn: fetchSalaryDistribution,
@@ -86,12 +90,21 @@ const Dashboard: FC = () => {
 
   const hasError = overviewError || countryError || deptError || distError;
 
+  const handleRetry = () => {
+    refetchOverview();
+    refetchCountry();
+    refetchDept();
+    refetchDist();
+  };
+
   if (hasError) {
     return (
-      <Box sx={{ mt: 2 }}>
-        <Alert severity="error">
-          Failed to load compensation analytics. Please verify that the backend is running.
-        </Alert>
+      <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
+        <ErrorPanel
+          title="Failed to Load Dashboard Analytics"
+          message="Failed to load compensation analytics. Please verify that the backend is running."
+          onRetry={handleRetry}
+        />
       </Box>
     );
   }
@@ -130,7 +143,7 @@ const Dashboard: FC = () => {
   ];
 
   return (
-    <Box sx={{ pb: 4 }}>
+    <Box className="animate-page" sx={{ pb: 4 }}>
       <DashboardHeader>
         <Title variant="h3">
           Welcome back, HR Manager

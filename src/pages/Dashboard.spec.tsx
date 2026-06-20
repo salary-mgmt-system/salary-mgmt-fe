@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { ThemeProvider } from '@mui/material/styles';
@@ -136,6 +136,31 @@ describe('Dashboard Component', () => {
           'Failed to load compensation analytics. Please verify that the backend is running.'
         )
       ).toBeInTheDocument();
+    });
+  });
+
+  it('calls refetch functions when retry button is clicked', async () => {
+    vi.mocked(fetchOverviewAnalytics).mockRejectedValueOnce(new Error('Network error'));
+    renderDashboard();
+
+    let retryBtn: HTMLElement;
+    await waitFor(() => {
+      retryBtn = screen.getByTestId('error-retry-button');
+      expect(retryBtn).toBeInTheDocument();
+    });
+
+    vi.mocked(fetchOverviewAnalytics).mockClear();
+    vi.mocked(fetchCountryAnalytics).mockClear();
+    vi.mocked(fetchDepartmentAnalytics).mockClear();
+    vi.mocked(fetchSalaryDistribution).mockClear();
+
+    fireEvent.click(retryBtn!);
+
+    await waitFor(() => {
+      expect(fetchOverviewAnalytics).toHaveBeenCalled();
+      expect(fetchCountryAnalytics).toHaveBeenCalled();
+      expect(fetchDepartmentAnalytics).toHaveBeenCalled();
+      expect(fetchSalaryDistribution).toHaveBeenCalled();
     });
   });
 

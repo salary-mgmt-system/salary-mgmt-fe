@@ -7,10 +7,10 @@ import Card from '@mui/material/Card';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
-import Alert from '@mui/material/Alert';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import LightbulbRoundedIcon from '@mui/icons-material/LightbulbRounded';
 
+import ErrorPanel from '../components/ErrorPanel';
 import { queryInsights } from '../api/api';
 import {
   PageHeader,
@@ -52,7 +52,7 @@ const Insights: FC = () => {
   };
 
   return (
-    <Box sx={{ pb: 4 }}>
+    <Box className="animate-page" sx={{ pb: 4 }}>
       <PageHeader>
         <PageTitle variant="h3">
           Compensation Insights
@@ -123,10 +123,16 @@ const Insights: FC = () => {
       )}
 
       {mutation.isError && (
-        <Box sx={{ mt: 3 }}>
-          <Alert severity="error">
-            Failed to fetch compensation insights. Please verify that the question is valid and the backend is running.
-          </Alert>
+        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+          <ErrorPanel
+            title="Insights Query Error"
+            message="Failed to fetch compensation insights. Please verify that the question is valid and the backend is running."
+            onRetry={() => {
+              if (question.trim()) {
+                mutation.mutate(question);
+              }
+            }}
+          />
         </Box>
       )}
 

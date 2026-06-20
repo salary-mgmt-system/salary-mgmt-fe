@@ -9,6 +9,8 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import theme from '../theme/theme';
 
+import IconButton from '@mui/material/IconButton';
+
 export const DRAWER_WIDTH = 260;
 
 export const RootContainer = styled(Box)`
@@ -34,9 +36,14 @@ export const StyledAppBar = styled(AppBar)`
 
 export const StyledToolbar = styled(Toolbar)`
   && {
-    justify-content: space-between;
-    padding-left: 24px;
-    padding-right: 24px;
+    justify-content: flex-start;
+    padding-left: 16px;
+    padding-right: 16px;
+
+    @media (min-width: 600px) {
+      padding-left: 24px;
+      padding-right: 24px;
+    }
   }
 `;
 
@@ -47,9 +54,28 @@ export const Title = styled(Typography)`
   }
 `;
 
-export const StyledDrawer = styled(Drawer)`
+export const MenuButton = styled(IconButton)`
+  && {
+    margin-right: 12px;
+    color: ${theme.palette.text.secondary};
+
+    @media (min-width: 600px) {
+      display: none;
+    }
+  }
+`;
+
+export const StyledDrawer = styled(Drawer)<{ $isMobile?: boolean }>`
   width: ${DRAWER_WIDTH}px;
   flex-shrink: 0;
+
+  @media (max-width: 599px) {
+    display: ${props => (props.$isMobile ? 'block' : 'none')};
+  }
+
+  @media (min-width: 600px) {
+    display: ${props => (props.$isMobile ? 'none' : 'block')};
+  }
 
   & .MuiDrawer-paper {
     width: ${DRAWER_WIDTH}px;
@@ -144,11 +170,13 @@ export const NavItemText = styled(Typography)<{ $isSelected?: boolean }>`
 
 export const MainContent = styled(Box)`
   flex-grow: 1;
-  padding: 32px;
-  margin-top: 64px;
+  padding: 16px;
+  margin-top: 56px;
   width: 100%;
 
   @media (min-width: 600px) {
+    padding: 32px;
+    margin-top: 64px;
     width: calc(100% - ${DRAWER_WIDTH}px);
   }
 `;

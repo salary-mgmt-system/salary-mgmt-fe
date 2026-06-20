@@ -108,6 +108,25 @@ describe('Employees Component', () => {
     });
   });
 
+  it('calls refetch function when retry button is clicked', async () => {
+    vi.mocked(fetchEmployees).mockRejectedValueOnce(new Error('Network Error'));
+    renderEmployees();
+
+    let retryBtn: HTMLElement;
+    await waitFor(() => {
+      retryBtn = screen.getByTestId('error-retry-button');
+      expect(retryBtn).toBeInTheDocument();
+    });
+
+    vi.mocked(fetchEmployees).mockClear();
+    vi.mocked(fetchEmployees).mockResolvedValueOnce(mockEmployeesData);
+    fireEvent.click(retryBtn!);
+
+    await waitFor(() => {
+      expect(screen.getByText('Alice Smith')).toBeInTheDocument();
+    });
+  });
+
   it('updates search query with debounce', async () => {
     vi.mocked(fetchEmployees).mockResolvedValue(mockEmployeesData);
     vi.useFakeTimers();
@@ -244,6 +263,34 @@ describe('Employees Component', () => {
     await waitFor(() => {
       expect(screen.getByText('No employees found.')).toBeInTheDocument();
     });
+  });
+
+  it('displays empty state with clear filters button when filters are active and matches are empty', async () => {
+    vi.mocked(fetchEmployees).mockResolvedValue(mockEmployeesData);
+    renderEmployees();
+
+    vi.mocked(fetchEmployees).mockResolvedValueOnce({
+      data: [],
+      total: 0,
+      page: 1,
+    });
+
+    vi.useFakeTimers();
+    const searchInput = screen.getByPlaceholderText('Search name, code, email...');
+    fireEvent.change(searchInput, { target: { value: 'NonExistent' } });
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+    vi.useRealTimers();
+
+    let clearBtn: HTMLElement;
+    await waitFor(() => {
+      clearBtn = screen.getByRole('button', { name: 'Clear Filters' });
+      expect(clearBtn).toBeInTheDocument();
+    });
+
+    fireEvent.click(clearBtn!);
+    expect(searchInput).toHaveValue('');
   });
 
   it('renders fallback values for missing salaries and invalid currency format', async () => {

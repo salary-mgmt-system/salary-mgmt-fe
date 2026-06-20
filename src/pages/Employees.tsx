@@ -11,11 +11,13 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import MenuItem from '@mui/material/MenuItem';
 import TablePagination from '@mui/material/TablePagination';
-import Alert from '@mui/material/Alert';
 import Skeleton from '@mui/material/Skeleton';
 import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
+import SearchOffRoundedIcon from '@mui/icons-material/SearchOffRounded';
 
+import ErrorPanel from '../components/ErrorPanel';
+import EmptyState from '../components/EmptyState';
 import { fetchEmployees } from '../api/api';
 import {
   PageHeader,
@@ -68,7 +70,7 @@ const Employees: FC = () => {
     return () => clearTimeout(handler);
   }, [searchInput, search]);
 
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['employees', { page, pageSize, search, department, country, sortBy, sortOrder }],
     queryFn: () => fetchEmployees({ page, pageSize, search, department, country, sortBy, sortOrder }),
     placeholderData: keepPreviousData,
@@ -100,7 +102,7 @@ const Employees: FC = () => {
   ];
 
   return (
-    <Box>
+    <Box className="animate-page">
       <PageHeader>
         <PageTitle variant="h3">
           Employee Directory
@@ -115,11 +117,13 @@ const Employees: FC = () => {
         <FilterToolbar>
           <SearchField
             size="small"
+            id="employee-search"
             placeholder="Search name, code, email..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             slotProps={{
               input: {
+                'aria-label': 'Search employees by name, email, or code',
                 startAdornment: (
                   <InputAdornment position="start">
                     <SearchIcon color="action" />
@@ -171,9 +175,13 @@ const Employees: FC = () => {
 
       {/* Employees Table */}
       {isError ? (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          Error loading employees: {error instanceof Error ? error.message : 'Unknown error'}
-        </Alert>
+        <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
+          <ErrorPanel
+            title="Failed to Load Employee Directory"
+            message={`Error loading employees: ${error instanceof Error ? error.message : 'Unknown error'}`}
+            onRetry={() => refetch()}
+          />
+        </Box>
       ) : (
         <StyledTableContainer component={Paper}>
           <StyledTable>
@@ -234,7 +242,23 @@ const Employees: FC = () => {
               ) : (
                 <TableRow>
                   <EmptyStateCell colSpan={columns.length} align="center">
-                    <Typography color="text.secondary">No employees found.</Typography>
+                    <EmptyState
+                      icon={<SearchOffRoundedIcon />}
+                      title="No Employees Found"
+                      message="No employees found."
+                      actionText={search || department || country ? 'Clear Filters' : undefined}
+                      onAction={
+                        search || department || country
+                          ? () => {
+                              setSearchInput('');
+                              setSearch('');
+                              setDepartment('');
+                              setCountry('');
+                              setPage(1);
+                            }
+                          : undefined
+                      }
+                    />
                   </EmptyStateCell>
                 </TableRow>
               )}

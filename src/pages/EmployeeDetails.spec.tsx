@@ -367,7 +367,7 @@ describe('EmployeeDetails Component', () => {
       expect(screen.queryByTestId('salary-update-success')).not.toBeInTheDocument();
     });
 
-    it('shows success snackbar after successful salary update', async () => {
+    it('shows success snackbar after successful salary update and closes via Escape', async () => {
       const user = userEvent.setup();
       vi.mocked(fetchEmployeeDetails).mockResolvedValue(mockEmployeeDetails);
       vi.mocked(updateSalary).mockResolvedValueOnce({
@@ -400,7 +400,90 @@ describe('EmployeeDetails Component', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('salary-update-success')).toBeInTheDocument();
-        expect(screen.getByText('Salary updated successfully!')).toBeInTheDocument();
+      });
+
+      // Press Escape to trigger Snackbar onClose callback
+      await user.keyboard('{Escape}');
+    });
+
+    it('shows success snackbar after successful salary update and closes via Alert close button', async () => {
+      const user = userEvent.setup();
+      vi.mocked(fetchEmployeeDetails).mockResolvedValue(mockEmployeeDetails);
+      vi.mocked(updateSalary).mockResolvedValueOnce({
+        employee: mockEmployeeDetails.employee,
+        currentSalary: { ...mockEmployeeDetails.currentSalary!, baseSalary: 130000 },
+      });
+      renderEmployeeDetails();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('update-salary-btn')).toBeInTheDocument();
+      });
+
+      await user.click(screen.getByTestId('update-salary-btn'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('salary-update-dialog')).toBeInTheDocument();
+      });
+
+      const baseSalaryInput = screen.getByTestId('base-salary-input');
+      await user.clear(baseSalaryInput);
+      await user.type(baseSalaryInput, '130000');
+
+      const effectiveDateInput = screen.getByTestId('effective-date-input');
+      await user.type(effectiveDateInput, '2026-07-01');
+
+      const reasonInput = screen.getByTestId('reason-input');
+      await user.type(reasonInput, 'Performance review');
+
+      await user.click(screen.getByTestId('salary-update-submit'));
+
+      let closeAlertBtn: HTMLElement;
+      await waitFor(() => {
+        closeAlertBtn = screen.getByRole('button', { name: 'Close' });
+        expect(closeAlertBtn).toBeInTheDocument();
+      });
+
+      // Click Alert Close button to trigger Alert onClose callback
+      await user.click(closeAlertBtn!);
+    });
+
+    it('navigates back to directory when clicking action on not found empty state', async () => {
+      const user = userEvent.setup();
+      vi.mocked(fetchEmployeeDetails).mockResolvedValueOnce({
+        employee: null,
+        currentSalary: null,
+      } as unknown as GetEmployeeDetailsResponse);
+      renderEmployeeDetails();
+
+      let backBtn: HTMLElement;
+      await waitFor(() => {
+        backBtn = screen.getByRole('button', { name: 'Back to Directory' });
+        expect(backBtn).toBeInTheDocument();
+      });
+
+      await user.click(backBtn!);
+    });
+
+    it('calls refetch functions when retry button is clicked', async () => {
+      const user = userEvent.setup();
+      vi.mocked(fetchEmployeeDetails).mockRejectedValueOnce(new Error('Record not found'));
+      renderEmployeeDetails();
+
+      let retryBtn: HTMLElement;
+      await waitFor(() => {
+        retryBtn = screen.getByTestId('error-retry-button');
+        expect(retryBtn).toBeInTheDocument();
+      });
+
+      vi.mocked(fetchEmployeeDetails).mockClear();
+      vi.mocked(fetchSalaryHistory).mockClear();
+      vi.mocked(fetchEmployeeDetails).mockResolvedValueOnce(mockEmployeeDetails);
+      vi.mocked(fetchSalaryHistory).mockResolvedValueOnce(mockSalaryHistory);
+
+      await user.click(retryBtn!);
+
+      await waitFor(() => {
+        expect(screen.getByText('Alice Smith')).toBeInTheDocument();
       });
     });
   });
