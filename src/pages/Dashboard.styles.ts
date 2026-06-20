@@ -7,6 +7,7 @@ import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
 import AttachMoneyRoundedIcon from '@mui/icons-material/AttachMoneyRounded';
 import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded';
 import TrendingDownRoundedIcon from '@mui/icons-material/TrendingDownRounded';
+import EqualizerRoundedIcon from '@mui/icons-material/EqualizerRounded';
 import theme from '../theme/theme';
 
 export const DashboardHeader = styled(Box)`
@@ -86,5 +87,12 @@ export const StyledTrendingDownIcon = styled(TrendingDownRoundedIcon)`
   && {
     font-size: 2.5rem;
     color: ${theme.palette.error.main};
+  }
+`;
+
+export const StyledMedianIcon = styled(EqualizerRoundedIcon)`
+  && {
+    font-size: 2.5rem;
+    color: ${theme.palette.info.main};
   }
 `;

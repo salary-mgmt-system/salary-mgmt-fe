@@ -99,6 +99,8 @@ const SalaryUpdateDialog: FC<SalaryUpdateDialogProps> = ({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employee', employeeId] });
       queryClient.invalidateQueries({ queryKey: ['employeeSalaryHistory', employeeId] });
+      queryClient.invalidateQueries({ queryKey: ['overviewAnalytics'] });
+      queryClient.invalidateQueries({ queryKey: ['employees'] });
       resetForm();
       onSuccess();
       onClose();

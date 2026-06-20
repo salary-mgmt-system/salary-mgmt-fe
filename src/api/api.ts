@@ -118,3 +118,19 @@ export async function updateSalary(id: string, payload: UpdateSalaryPayload): Pr
   }
   return res.json() as Promise<UpdateSalaryResponse>;
 }
+
+export interface OverviewAnalytics {
+  employeeCount: number;
+  averageSalary: number;
+  medianSalary: number;
+  highestSalary: number;
+  lowestSalary: number;
+}
+
+export async function fetchOverviewAnalytics(): Promise<OverviewAnalytics> {
+  const res = await fetch(`${API_BASE_URL}/analytics/overview`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch overview analytics: ${res.statusText}`);
+  }
+  return res.json() as Promise<OverviewAnalytics>;
+}
