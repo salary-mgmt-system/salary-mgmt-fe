@@ -65,7 +65,16 @@ export interface UpdateSalaryResponse {
   currentSalary: Salary;
 }
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:3000/api';
+const getApiBaseUrl = (): string => {
+  const envUrl = import.meta.env.VITE_API_BASE_URL as string;
+  if (!envUrl) {
+    return 'http://localhost:3000/api';
+  }
+  const cleanUrl = envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
+  return cleanUrl.endsWith('/api') ? cleanUrl : `${cleanUrl}/api`;
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 export async function fetchEmployees(params: GetEmployeesParams): Promise<GetEmployeesResponse> {
   const url = new URL(`${API_BASE_URL}/employees`);
