@@ -195,7 +195,7 @@ Analytics visualizations provide meaningful insights.
 
 ---
 
-# Iteration 10 - Insights Page
+# Iteration 10 - Insights Page [Completed]
 
 ## Objective
 
@@ -230,22 +230,3 @@ Improve usability and polish.
 ## Deliverable
 
 Application provides a polished user experience.
-
----
-
-# Iteration 12 - Deployment & Continuous Delivery
-
-## Objective
-
-Automate frontend delivery.
-
-## Tasks
-
-* Configure Vercel deployment
-* Configure environment variables
-* Verify production build
-* Enable automatic deployment from main branch
-
-## Deliverable
-
-Frontend is automatically deployed after successful merges.

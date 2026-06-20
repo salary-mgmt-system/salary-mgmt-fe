@@ -172,3 +172,15 @@ export async function fetchSalaryDistribution(): Promise<DistributionAnalytics[]
   }
   return res.json() as Promise<DistributionAnalytics[]>;
 }
+
+export async function queryInsights(question: string): Promise<{ answer: string }> {
+  const res = await fetch(`${API_BASE_URL}/insights/query`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question }),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to query insights: ${res.statusText}`);
+  }
+  return res.json() as Promise<{ answer: string }>;
+}
