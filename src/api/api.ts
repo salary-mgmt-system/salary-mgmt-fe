@@ -134,3 +134,41 @@ export async function fetchOverviewAnalytics(): Promise<OverviewAnalytics> {
   }
   return res.json() as Promise<OverviewAnalytics>;
 }
+
+export interface GroupAnalytics {
+  name: string;
+  employeeCount: number;
+  averageSalary: number;
+  medianSalary: number;
+  highestSalary: number;
+  lowestSalary: number;
+}
+
+export interface DistributionAnalytics {
+  bracket: string;
+  count: number;
+}
+
+export async function fetchCountryAnalytics(): Promise<GroupAnalytics[]> {
+  const res = await fetch(`${API_BASE_URL}/analytics/country`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch country analytics: ${res.statusText}`);
+  }
+  return res.json() as Promise<GroupAnalytics[]>;
+}
+
+export async function fetchDepartmentAnalytics(): Promise<GroupAnalytics[]> {
+  const res = await fetch(`${API_BASE_URL}/analytics/department`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch department analytics: ${res.statusText}`);
+  }
+  return res.json() as Promise<GroupAnalytics[]>;
+}
+
+export async function fetchSalaryDistribution(): Promise<DistributionAnalytics[]> {
+  const res = await fetch(`${API_BASE_URL}/analytics/distribution`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch salary distribution analytics: ${res.statusText}`);
+  }
+  return res.json() as Promise<DistributionAnalytics[]>;
+}

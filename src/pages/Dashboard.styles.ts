@@ -96,3 +96,42 @@ export const StyledMedianIcon = styled(EqualizerRoundedIcon)`
     color: ${theme.palette.info.main};
   }
 `;
+
+export const ChartSection = styled(Box)`
+  margin-top: 40px;
+`;
+
+export const ChartCard = styled(Card)`
+  && {
+    padding: 24px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.05);
+    border-radius: 16px;
+    transition: transform 0.2s ease-in-out;
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+`;
+
+export const ChartTitle = styled(Typography)`
+  && {
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: ${theme.palette.text.primary};
+  }
+`;
+
+export const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
+
+export const tickFormatter = (val: number) => `$${val / 1000}k`;
+export const tooltipSalaryFormatter = (value: number) => [formatCurrency(value), ''];
+export const tooltipCountFormatter = (value: number) => [`${value} Employees`, 'Count'];
